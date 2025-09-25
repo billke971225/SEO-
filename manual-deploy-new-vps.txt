@@ -1,0 +1,262 @@
+# 新VPS手动部署指南
+# VPS: 23.94.61.101
+# 用户: root
+# 密码: u5w9NGLWhn7r3cO2E5
+
+## 第一步：连接到VPS
+ssh root@23.94.61.101
+# 输入密码: u5w9NGLWhn7r3cO2E5
+
+## 第二步：创建项目目录并进入
+mkdir -p /root/seo-tools
+cd /root/seo-tools
+
+## 第三步：创建package.json
+cat > package.json << 'EOF'
+{
+  "name": "seo-tools",
+  "version": "1.0.0",
+  "description": "SEO工具集合",
+  "main": "main-server.js",
+  "scripts": {
+    "start": "node main-server.js",
+    "dashboard": "node dashboard-server.js",
+    "analyzer": "node seo-analyzer-server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  }
+}
+EOF
+
+## 第四步：安装依赖
+npm install
+
+## 第五步：创建主服务器文件
+cat > main-server.js << 'EOF'
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+
+const app = express();
+const PORT = 3000;
+
+app.use(cors());
+app.use(express.json());
+app.use(express.static('web'));
+
+app.get('/health', (req, res) => {
+    res.json({ status: 'healthy', service: 'main-server', port: PORT });
+});
+
+app.get('/', (req, res) => {
+    res.json({ 
+        message: 'SEO工具主服务',
+        version: '1.0.0',
+        services: {
+            main: 'http://23.94.61.101:3000',
+            dashboard: 'http://23.94.61.101:3001',
+            analyzer: 'http://23.94.61.101:3002'
+        }
+    });
+});
+
+app.get('/api/seo/analyze', async (req, res) => {
+    const { url } = req.query;
+    if (!url) {
+        return res.status(400).json({ error: '请提供URL参数' });
+    }
+    
+    res.json({
+        url: url,
+        timestamp: new Date().toISOString(),
+        analysis: {
+            status: 'completed',
+            title: '示例标题分析',
+            description: '示例描述分析',
+            keywords: ['seo', 'analysis', 'tool']
+        }
+    });
+});
+
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`主服务器运行在 http://0.0.0.0:${PORT}`);
+});
+EOF
+
+## 第六步：创建仪表板服务器文件
+cat > dashboard-server.js << 'EOF'
+const express = require('express');
+const cors = require('cors');
+
+const app = express();
+const PORT = 3001;
+
+app.use(cors());
+app.use(express.json());
+
+app.get('/health', (req, res) => {
+    res.json({ status: 'healthy', service: 'dashboard-server', port: PORT });
+});
+
+app.get('/', (req, res) => {
+    res.json({ 
+        message: 'SEO工具仪表板',
+        version: '1.0.0',
+        endpoints: ['/health', '/api/dashboard/stats']
+    });
+});
+
+app.get('/api/dashboard/stats', (req, res) => {
+    res.json({
+        totalAnalyses: 0,
+        activeProjects: 0,
+        lastUpdate: new Date().toISOString()
+    });
+});
+
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`仪表板服务器运行在 http://0.0.0.0:${PORT}`);
+});
+EOF
+
+## 第七步：创建SEO分析器服务器文件
+cat > seo-analyzer-server.js << 'EOF'
+const express = require('express');
+const cors = require('cors');
+
+const app = express();
+const PORT = 3002;
+
+app.use(cors());
+app.use(express.json());
+
+app.get('/health', (req, res) => {
+    res.json({ status: 'healthy', service: 'seo-analyzer-server', port: PORT });
+});
+
+app.post('/api/analyze', (req, res) => {
+    const { url } = req.body;
+    if (!url) {
+        return res.status(400).json({ error: '请提供URL' });
+    }
+    
+    res.json({
+        url: url,
+        analysis: {
+            title: '分析完成',
+            score: 85,
+            suggestions: ['优化标题', '添加meta描述', '改善页面速度']
+        },
+        timestamp: new Date().toISOString()
+    });
+});
+
+app.post('/api/keywords', (req, res) => {
+    const { keywords } = req.body;
+    res.json({
+        keywords: keywords || [],
+        analysis: '关键词分析完成',
+        timestamp: new Date().toISOString()
+    });
+});
+
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`SEO分析器服务器运行在 http://0.0.0.0:${PORT}`);
+});
+EOF
+
+## 第八步：创建systemd服务文件
+
+# 主服务
+cat > /etc/systemd/system/seo-tools-main.service << 'EOF'
+[Unit]
+Description=SEO Tools Main Server
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/seo-tools
+ExecStart=/usr/bin/node main-server.js
+Restart=always
+RestartSec=10
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# 仪表板服务
+cat > /etc/systemd/system/seo-tools-dashboard.service << 'EOF'
+[Unit]
+Description=SEO Tools Dashboard Server
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/seo-tools
+ExecStart=/usr/bin/node dashboard-server.js
+Restart=always
+RestartSec=10
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# SEO分析器服务
+cat > /etc/systemd/system/seo-tools-analyzer.service << 'EOF'
+[Unit]
+Description=SEO Tools Analyzer Server
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/seo-tools
+ExecStart=/usr/bin/node seo-analyzer-server.js
+Restart=always
+RestartSec=10
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+## 第九步：配置防火墙
+ufw --force enable
+ufw allow 22
+ufw allow 3000
+ufw allow 3001
+ufw allow 3002
+
+## 第十步：启用并启动服务
+systemctl daemon-reload
+systemctl enable seo-tools-main.service
+systemctl enable seo-tools-dashboard.service
+systemctl enable seo-tools-analyzer.service
+
+systemctl start seo-tools-main.service
+systemctl start seo-tools-dashboard.service
+systemctl start seo-tools-analyzer.service
+
+## 第十一步：检查服务状态
+systemctl status seo-tools-main.service
+systemctl status seo-tools-dashboard.service
+systemctl status seo-tools-analyzer.service
+
+## 第十二步：检查端口监听
+netstat -tlnp | grep -E ':(3000|3001|3002)'
+
+## 第十三步：测试健康检查
+curl http://localhost:3000/health
+curl http://localhost:3001/health
+curl http://localhost:3002/health
+
+## 完成！访问地址：
+# 🌐 主服务: http://23.94.61.101:3000
+# 📊 仪表板: http://23.94.61.101:3001
+# 🔍 SEO分析器: http://23.94.61.101:3002
