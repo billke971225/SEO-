@@ -1,0 +1,18 @@
+{
+  "name": "seo-tools-vps",
+  "version": "1.0.0",
+  "description": "SEO Tools VPS Deployment",
+  "main": "main-server.js",
+  "scripts": {
+    "start": "node main-server.js",
+    "dashboard": "node dashboard-server.js",
+    "dev": "npm run start & npm run dashboard",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "keywords": ["seo", "tools", "vps", "express"],
+  "author": "SEO Tools Team",
+  "license": "MIT"
+}
