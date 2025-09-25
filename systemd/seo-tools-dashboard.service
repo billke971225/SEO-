@@ -1,0 +1,18 @@
+[Unit]
+Description=SEO Tools Dashboard Server
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/seo-tools
+Environment=NODE_ENV=production
+Environment=PORT=3001
+ExecStart=/usr/bin/node dashboard-server.js
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

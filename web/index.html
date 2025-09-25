@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEO工具系统 - SayWishes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.2em;
+        }
+
+        .status-bar {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .status-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #27ae60;
+        }
+
+        .status-item h3 {
+            color: #27ae60;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+
+        .status-item p {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .service-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        }
+
+        .service-card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .service-card p {
+            color: #7f8c8d;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            margin: 5px 10px 5px 0;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
+            background: linear-gradient(135deg, #2980b9, #3498db);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            box-shadow: 0 5px 15px rgba(149, 165, 166, 0.3);
+        }
+
+        .btn.secondary:hover {
+            background: linear-gradient(135deg, #7f8c8d, #95a5a6);
+            box-shadow: 0 8px 25px rgba(149, 165, 166, 0.4);
+        }
+
+        .icon {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .health-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #27ae60;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .service-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .status-bar {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 SEO工具系统</h1>
+            <p>专业的SEO监控与分析平台 - SayWishes</p>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-item">
+                <h3><span class="health-indicator"></span>系统状态</h3>
+                <p id="system-status">运行正常</p>
+            </div>
+            <div class="status-item">
+                <h3>🌐 服务端口</h3>
+                <p>3000 (主服务) | 3001 (仪表板)</p>
+            </div>
+            <div class="status-item">
+                <h3>⏰ 最后更新</h3>
+                <p id="timestamp">加载中...</p>
+            </div>
+            <div class="status-item">
+                <h3>📊 运行时间</h3>
+                <p id="uptime">计算中...</p>
+            </div>
+        </div>
+
+        <div class="service-grid">
+            <div class="service-card">
+                <h3>
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+                    </svg>
+                    SEO监控仪表板
+                </h3>
+                <p>实时查看SEO分析报告、关键词排名监控、网站性能数据和优化建议。提供直观的图表和详细的分析报告。</p>
+                <a href="#" class="btn" onclick="openDashboard()">访问仪表板</a>
+                <a href="#" class="btn secondary" onclick="checkDashboardHealth()">健康检查</a>
+            </div>
+            
+            <div class="service-card">
+                <h3>
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    API服务接口
+                </h3>
+                <p>提供RESTful API接口，支持数据查询、SEO分析、关键词监控等功能。完整的API文档和示例代码。</p>
+                <a href="/api/status" class="btn" target="_blank">API状态</a>
+                <a href="#" class="btn secondary" onclick="testAPI()">测试接口</a>
+            </div>
+            
+            <div class="service-card">
+                <h3>
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                    系统监控中心
+                </h3>
+                <p>监控服务器状态、性能指标、错误日志和系统资源使用情况。提供实时告警和自动化运维功能。</p>
+                <a href="#" class="btn" onclick="openMonitoring()">查看监控</a>
+                <a href="#" class="btn secondary" onclick="downloadLogs()">下载日志</a>
+            </div>
+
+            <div class="service-card">
+                <h3>
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    SEO工具集
+                </h3>
+                <p>集成多种SEO分析工具，包括关键词研究、竞争对手分析、网站审计、链接分析等专业功能。</p>
+                <a href="#" class="btn" onclick="openTools()">使用工具</a>
+                <a href="#" class="btn secondary" onclick="viewDocumentation()">查看文档</a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>© 2024 SayWishes SEO工具系统 | 版本 1.0.0 | 技术支持</p>
+            <p>服务器时间: <span id="server-time">加载中...</span></p>
+        </div>
+    </div>
+
+    <script>
+        // 更新时间戳
+        function updateTimestamp() {
+            const now = new Date();
+            document.getElementById('timestamp').textContent = now.toLocaleString('zh-CN');
+            document.getElementById('server-time').textContent = now.toLocaleString('zh-CN');
+        }
+
+        // 更新运行时间
+        function updateUptime() {
+            fetch('/api/status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.uptime) {
+                        const hours = Math.floor(data.uptime / 3600);
+                        const minutes = Math.floor((data.uptime % 3600) / 60);
+                        document.getElementById('uptime').textContent = `${hours}小时 ${minutes}分钟`;
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('uptime').textContent = '获取失败';
+                });
+        }
+
+        // 检查系统状态
+        function checkSystemStatus() {
+            fetch('/health')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'healthy') {
+                        document.getElementById('system-status').textContent = '运行正常';
+                        document.getElementById('system-status').style.color = '#27ae60';
+                    } else {
+                        document.getElementById('system-status').textContent = '状态异常';
+                        document.getElementById('system-status').style.color = '#e74c3c';
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('system-status').textContent = '连接失败';
+                    document.getElementById('system-status').style.color = '#e74c3c';
+                });
+        }
+
+        // 打开仪表板
+        function openDashboard() {
+            const port = window.location.port === '3000' ? '3001' : '3001';
+            const url = `${window.location.protocol}//${window.location.hostname}:${port}`;
+            window.open(url, '_blank');
+        }
+
+        // 检查仪表板健康状态
+        function checkDashboardHealth() {
+            const port = '3001';
+            const url = `${window.location.protocol}//${window.location.hostname}:${port}/health`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    alert(`仪表板状态: ${data.status}\n端口: ${data.port}\n运行时间: ${Math.floor(data.uptime / 60)}分钟`);
+                })
+                .catch(error => {
+                    alert('仪表板连接失败，请检查服务状态');
+                });
+        }
+
+        // 测试API
+        function testAPI() {
+            fetch('/api/status')
+                .then(response => response.json())
+                .then(data => {
+                    alert(`API测试成功!\n服务: ${data.service}\n状态: ${data.status}\n版本: ${data.version}`);
+                })
+                .catch(error => {
+                    alert('API测试失败，请检查服务状态');
+                });
+        }
+
+        // 打开监控
+        function openMonitoring() {
+            alert('监控功能开发中，敬请期待！');
+        }
+
+        // 下载日志
+        function downloadLogs() {
+            alert('日志下载功能开发中，敬请期待！');
+        }
+
+        // 打开工具集
+        function openTools() {
+            alert('SEO工具集功能开发中，敬请期待！');
+        }
+
+        // 查看文档
+        function viewDocumentation() {
+            alert('文档功能开发中，敬请期待！');
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTimestamp();
+            checkSystemStatus();
+            updateUptime();
+            
+            // 定期更新
+            setInterval(updateTimestamp, 60000); // 每分钟更新时间
+            setInterval(checkSystemStatus, 30000); // 每30秒检查状态
+            setInterval(updateUptime, 60000); // 每分钟更新运行时间
+        });
+
+        // 页面可见性变化时更新
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                updateTimestamp();
+                checkSystemStatus();
+                updateUptime();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+[Unit]
+Description=SEO Tools Main Server
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/seo-tools
+Environment=NODE_ENV=production
+Environment=PORT=3000
+ExecStart=/usr/bin/node main-server.js
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
