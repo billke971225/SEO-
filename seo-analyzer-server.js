@@ -701,70 +701,55 @@ app.get('/', (req, res) => {
             color: white;
             border-color: #667eea;
         }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🔍 SEO分析器</h1>
-            <p>专业的网站SEO分析与优化建议工具</p>
-        </div>
         
-        <div class="main-content">
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .score-number {
+                font-size: 2.5em;
+            }
+            
+            .page-info {
+                grid-template-columns: 1fr;
+            }
+        }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>🔍 SEO分析器</h1>
+                <p>输入网站URL，获取详细的SEO分析报告</p>
+            </div>
+            
             <form id="seoForm">
                 <div class="form-group">
-                    <label for="url">请输入要分析的网站URL:</label>
+                    <label for="url">网站URL:</label>
                     <input type="url" id="url" name="url" placeholder="https://example.com" required>
                 </div>
                 
                 <div class="quick-actions">
-                    <div class="quick-btn" onclick="setQuickUrl('https://wishesvideo.com/')">分析 WishesVideo</div>
-                    <div class="quick-btn" onclick="setQuickUrl('https://saywishes.com')">分析 SayWishes</div>
-                    <div class="quick-btn" onclick="setQuickUrl('https://vidblessings.com')">分析 VidBlessings</div>
+                    <button type="button" class="quick-btn" onclick="fillExample('https://wishesvideo.com')">测试 WishesVideo</button>
+                    <button type="button" class="quick-btn" onclick="fillExample('https://google.com')">测试 Google</button>
+                    <button type="button" class="quick-btn" onclick="fillExample('https://github.com')">测试 GitHub</button>
                 </div>
                 
-                <button type="submit" class="btn" id="analyzeBtn">开始SEO分析</button>
+                <button type="submit">开始分析</button>
             </form>
             
-            <div class="loading" id="loading">
-                <div class="spinner"></div>
-                <h3>🔄 正在分析网站...</h3>
-                <p>请稍候，这可能需要几秒钟时间</p>
+            <div id="loading" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p>正在分析网站，请稍候...</p>
             </div>
             
-            <div class="results" id="results">
-                <div class="score-card" id="scoreCard">
-                    <div class="score-number" id="scoreNumber">0</div>
-                    <div class="score-label">SEO得分</div>
-                </div>
-                
-                <div class="page-info" id="pageInfo">
-                    <!-- 页面信息将在这里显示 -->
-                </div>
-                
-                <div class="analysis-section">
-                    <h3>🚨 发现的问题</h3>
-                    <div id="issuesList">
-                        <!-- 问题列表将在这里显示 -->
-                    </div>
-                </div>
-                
-                <div class="analysis-section">
-                    <h3>💡 优化建议</h3>
-                    <div id="suggestionsList">
-                        <!-- 建议列表将在这里显示 -->
-                    </div>
-                </div>
-            </div>
-            
-            <div class="error-message" id="errorMessage" style="display: none;">
-                <!-- 错误信息将在这里显示 -->
-            </div>
+            <div id="results" style="display: none;"></div>
+            <div id="error" style="display: none;"></div>
         </div>
-    </div>
-
-    <script>
-        function setQuickUrl(url) {
+        
+        <script>
+        function fillExample(url) {
             document.getElementById('url').value = url;
         }
         
@@ -774,102 +759,114 @@ app.get('/', (req, res) => {
             const url = document.getElementById('url').value;
             const loadingDiv = document.getElementById('loading');
             const resultsDiv = document.getElementById('results');
-            const errorDiv = document.getElementById('errorMessage');
-            const analyzeBtn = document.getElementById('analyzeBtn');
+            const errorDiv = document.getElementById('error');
             
-            // 重置显示状态
-            loadingDiv.classList.add('show');
-            resultsDiv.classList.remove('show');
+            // 显示加载状态
+            loadingDiv.style.display = 'block';
+            resultsDiv.style.display = 'none';
             errorDiv.style.display = 'none';
-            analyzeBtn.disabled = true;
-            analyzeBtn.textContent = '分析中...';
             
             try {
-                // 调用分析API
                 const response = await fetch('/api/analyze/comprehensive', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        url: url,
-                        content: '', // 将由服务器获取
-                        meta: {},
-                        images: []
-                    })
+                    body: JSON.stringify({ url: url })
                 });
                 
                 const data = await response.json();
                 
-                if (data.success) {
-                    displayResults(data.data);
+                if (response.ok) {
+                    displayResults(data);
                 } else {
-                    throw new Error(data.error || '分析失败');
+                    showError(data.error || '分析失败');
                 }
-                
             } catch (error) {
-                console.error('分析错误:', error);
-                showError('分析失败: ' + error.message);
+                showError('网络错误: ' + error.message);
             } finally {
-                loadingDiv.classList.remove('show');
-                analyzeBtn.disabled = false;
-                analyzeBtn.textContent = '开始SEO分析';
+                loadingDiv.style.display = 'none';
             }
         });
         
         function displayResults(data) {
             const resultsDiv = document.getElementById('results');
-            const scoreNumber = document.getElementById('scoreNumber');
-            const pageInfo = document.getElementById('pageInfo');
-            const issuesList = document.getElementById('issuesList');
-            const suggestionsList = document.getElementById('suggestionsList');
             
-            // 显示SEO得分
-            scoreNumber.textContent = data.seoScore || 0;
-            
-            // 显示页面信息
-            pageInfo.innerHTML = `
-                <div class="info-card">
-                    <h4>页面标题</h4>
-                    <p>${data.title || '未找到标题'}</p>
+            let html = `
+                <div class="score-card">
+                    <div class="score-number">${data.score}</div>
+                    <div class="score-label">SEO得分 / 100</div>
                 </div>
-                <div class="info-card">
-                    <h4>Meta描述</h4>
-                    <p>${data.description || '未找到描述'}</p>
-                </div>
-                <div class="info-card">
-                    <h4>分析时间</h4>
-                    <p>${new Date(data.timestamp).toLocaleString()}</p>
-                </div>
-                <div class="info-card">
-                    <h4>页面URL</h4>
-                    <p>${data.url || ''}</p>
+                
+                <div class="analysis-section">
+                    <h3>📊 页面信息</h3>
+                    <div class="page-info">
+                        <div class="info-card">
+                            <h4>页面标题</h4>
+                            <p>${data.pageInfo.title || '未找到'}</p>
+                        </div>
+                        <div class="info-card">
+                            <h4>Meta描述</h4>
+                            <p>${data.pageInfo.metaDescription || '未找到'}</p>
+                        </div>
+                        <div class="info-card">
+                            <h4>H1标签</h4>
+                            <p>${data.pageInfo.h1Count} 个</p>
+                        </div>
+                        <div class="info-card">
+                            <h4>H2标签</h4>
+                            <p>${data.pageInfo.h2Count} 个</p>
+                        </div>
+                        <div class="info-card">
+                            <h4>图片数量</h4>
+                            <p>${data.pageInfo.imageCount} 个</p>
+                        </div>
+                        <div class="info-card">
+                            <h4>缺少Alt的图片</h4>
+                            <p>${data.pageInfo.imagesWithoutAlt} 个</p>
+                        </div>
+                        <div class="info-card">
+                            <h4>内容长度</h4>
+                            <p>${data.pageInfo.contentLength} 字符</p>
+                        </div>
+                    </div>
                 </div>
             `;
             
-            // 显示问题列表
-            const issues = data.issues || ['暂无发现问题'];
-            issuesList.innerHTML = issues.map(issue => 
-                `<div class="issue-item">${issue}</div>`
-            ).join('');
+            if (data.issues && data.issues.length > 0) {
+                html += `
+                    <div class="analysis-section">
+                        <h3>⚠️ 发现的问题</h3>
+                `;
+                data.issues.forEach(issue => {
+                    html += `<div class="issue-item">${issue}</div>`;
+                });
+                html += `</div>`;
+            }
             
-            // 显示建议列表
-            const suggestions = data.suggestions || ['继续保持良好的SEO实践'];
-            suggestionsList.innerHTML = suggestions.map(suggestion => 
-                `<div class="suggestion-item">${suggestion}</div>`
-            ).join('');
+            if (data.suggestions && data.suggestions.length > 0) {
+                html += `
+                    <div class="analysis-section">
+                        <h3>💡 优化建议</h3>
+                `;
+                data.suggestions.forEach(suggestion => {
+                    html += `<div class="suggestion-item">${suggestion}</div>`;
+                });
+                html += `</div>`;
+            }
             
-            resultsDiv.classList.add('show');
+            resultsDiv.innerHTML = html;
+            resultsDiv.style.display = 'block';
         }
         
         function showError(message) {
-            const errorDiv = document.getElementById('errorMessage');
-            errorDiv.textContent = message;
+            const errorDiv = document.getElementById('error');
+            errorDiv.innerHTML = `<div class="error-message">❌ ${message}</div>`;
             errorDiv.style.display = 'block';
         }
-    </script>
-</body>
-</html>
+        </script>
+    </body>
+    </html>`
     `);
 });
 
