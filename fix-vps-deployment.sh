@@ -170,9 +170,9 @@ app.get('/', (req, res) => {
 
             <div class="section">
                 <h2>📊 服务状态</h2>
-                <p>✅ 主服务: <a href="http://45.76.177.239:3000/health" target="_blank">http://45.76.177.239:3000</a></p>
-                <p>✅ 仪表板: <a href="http://45.76.177.239:3001" target="_blank">http://45.76.177.239:3001</a></p>
-                <p>✅ SEO分析器: <a href="http://45.76.177.239:3002" target="_blank">http://45.76.177.239:3002</a></p>
+                <p>✅ 主服务: <a href="http://23.94.61.101:3000/health" target="_blank">http://23.94.61.101:3000</a></p>
+                 <p>✅ 仪表板: <a href="http://23.94.61.101:3001" target="_blank">http://23.94.61.101:3001</a></p>
+                 <p>✅ SEO分析器: <a href="http://23.94.61.101:3002" target="_blank">http://23.94.61.101:3002</a></p>
             </div>
 
             <div class="section">
@@ -522,10 +522,9 @@ curl -s http://localhost:3002/ | head -n 5 || echo "SEO分析器服务检查失�
 echo "=== 防火墙状态 ==="
 ufw status
 
-echo "=== 修复完成 ==="
-echo "外部访问地址:"
-echo "🌐 主服务: http://45.76.177.239:3000"
-echo "📊 仪表板: http://45.76.177.239:3001"
-echo "🔍 SEO分析器: http://45.76.177.239:3002"
+echo "🎉 部署完成！所有服务已启动并运行在以下地址："
+echo "📊 主服务: http://23.94.61.101:3000"
+echo "📈 仪表板: http://23.94.61.101:3001"
+echo "🔍 SEO分析器: http://23.94.61.101:3002"
 echo ""
 echo "完成时间: $(date)"
